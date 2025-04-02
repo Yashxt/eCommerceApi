@@ -246,3 +246,46 @@ export const productListController = async (req, res) => {
     });
   }
 };
+export const productSearchController = async(req,res)=>{
+  try{
+   const {keyword} = req.params;
+   const result = await productModel.find({
+    $or : [
+    {  name:{$regex:keyword, $options:"i"}}, //option(i ) means casd in sensitive
+      {description:{$regex:keyword, $options:"i"}},
+     ]
+   }).select("-photo")
+   res.json({
+    result,
+   })
+  }
+  catch(error){
+  console.log(error);
+  res.status(400).send({
+    success:false,
+    message:"error in search product api",
+    error,
+  })
+  }
+
+}
+export const relatedProductController = async(req,res)=>{
+  try{
+const {pid,cid} = req.params;
+const products = await productModel.find({
+   category:cid,
+   _id:{$ne:pid},
+}).select("-photo").limit(3).populate("category");
+res.status(200).send({
+  success:true,
+  products,
+})
+  }
+  catch(error){
+   res.status(400).send({
+    success:false,
+    messgae:"error while getting related productss",
+    error,
+   })
+  }
+}

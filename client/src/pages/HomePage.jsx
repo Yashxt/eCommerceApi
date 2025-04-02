@@ -4,7 +4,10 @@ import { useAuth } from "../context/Auth.jsx"; //
 import toast from "react-hot-toast";
 import {Checkbox,Radio} from "antd"
 import { Prices } from "../components/Prices.jsx";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/cart.jsx";
 const HomePage = () => {
+  const {cart,setCart} = useCart()
   const { auth, setAuth } = useAuth();
   const [product,setProduct] = useState([]);
   const [categories,setCategories] = useState([]) 
@@ -13,6 +16,7 @@ const HomePage = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const getTotal = async () => {
     try {
@@ -180,7 +184,7 @@ toast.error("something went wrong while getting category");
               <h5 className="card-title">{p.name}</h5>
               <p className="card-text">{p.description.substring(0,30)}</p>
               <p className="card-text"> ${p.price}</p>
-              <button className="btn btn-primary ms-1">more details </button>
+              <button className="btn btn-primary ms-1" onClick={()=>{navigate(`/product/${p.slug}`)}}>more details </button>
               <button className="btn btn-secondary ms-1">add to cart</button>
             </div>
           </div>

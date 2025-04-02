@@ -2,6 +2,7 @@ import { NavLink,Link } from "react-router-dom"
 import { TiShoppingCart } from "react-icons/ti";
 import {useAuth} from "../../context/Auth.jsx"; 
 import toast from "react-hot-toast"
+import SearchInput from './../Form/SearchInput';
 const Headder = () => {
   const {auth,setAuth} = useAuth();
   const handleLogout = ()=>{
@@ -23,6 +24,7 @@ const Headder = () => {
     <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
       <Link to="/"className="navbar-brand" ><TiShoppingCart/>&nbsp;Ecommerce App</Link>
       <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+        <SearchInput/>
         <li className="nav-item">
           <NavLink to="/"  className={({ isActive }) => isActive ? "nav-link active-link" : "nav-link"}>Home</NavLink>
         </li>

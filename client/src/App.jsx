@@ -18,11 +18,17 @@ import Orders from './pages/user/Orders';
 import Profile from './pages/user/Profile';
 import Product from "./pages/Admin/Product";
 import UpdateProduct from "./pages/Admin/UpdateProduct";
+import SearchPage from "./pages/SearchPage";
+import ProductDetails from "./pages/ProductDetails";
+import Category from "./pages/Category";
+import CartShopping from "./pages/CartShopping";
  function App(){
   return (
     <Routes>
      <Route path = "/" element = {<HomePage/>}/>
      <Route path = "/register" element = {<Register/>} />
+     <Route path = "/product/:slug" element = {<ProductDetails/>} />
+     <Route path = "/search" element = {<SearchPage/>} />
      <Route path = "/dashboard" element= {<PrivateRoute/>} >
      <Route path = "user" element = {<Dashboard/>}/>
      <Route path = "user/orders" element = {<Orders/>}/>
@@ -40,6 +46,8 @@ import UpdateProduct from "./pages/Admin/UpdateProduct";
      <Route path = "/login" element = {<Login/>} />
      <Route path="/about" element={<About />} />  
       <Route path="/contact" element={<Contact />} />
+      <Route path="/category" element={<Category />} />
+      <Route path="/cart" element={<CartShopping />} />
       <Route path="/policy" element={<Policy />} />
       <Route path="*" element={<Pagenotfound />} />
     </Routes>
