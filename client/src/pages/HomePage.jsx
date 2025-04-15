@@ -185,7 +185,10 @@ toast.error("something went wrong while getting category");
               <p className="card-text">{p.description.substring(0,30)}</p>
               <p className="card-text"> ${p.price}</p>
               <button className="btn btn-primary ms-1" onClick={()=>{navigate(`/product/${p.slug}`)}}>more details </button>
-              <button className="btn btn-secondary ms-1">add to cart</button>
+              <button className="btn btn-secondary ms-1" onClick ={()=>{setCart([...cart,p])
+               localStorage.setItem("cart",JSON.stringify([...cart,p]))
+                toast.success("item added to cart")
+              }}>add to cart</button>
             </div>
           </div>
         ))}

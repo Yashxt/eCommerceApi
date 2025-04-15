@@ -1,10 +1,13 @@
 import { NavLink,Link } from "react-router-dom"
 import { TiShoppingCart } from "react-icons/ti";
 import {useAuth} from "../../context/Auth.jsx"; 
+import { useCart } from "../../context/cart.jsx";
+import {Badge} from "antd"
 import toast from "react-hot-toast"
 import SearchInput from './../Form/SearchInput';
 const Headder = () => {
   const {auth,setAuth} = useAuth();
+  const {cart,setCart} = useCart();
   const handleLogout = ()=>{
    setAuth({
     ...auth,
@@ -55,8 +58,11 @@ const Headder = () => {
      </>)
 }
         <li className="nav-item">
-          <NavLink to="/cart"  className={({ isActive }) => isActive ? "nav-link active-link" : "nav-link"} >Cart (0)</NavLink>
-        </li>
+        <Badge count={cart?.length} showZero>
+          <NavLink to="/cart"  className={({ isActive }) => isActive ? "nav-link active-link" : "nav-link"} >Cart 
+          </NavLink>
+         </Badge>
+         </li>
       </ul>
      
     </div>

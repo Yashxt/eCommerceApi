@@ -22,6 +22,8 @@ import SearchPage from "./pages/SearchPage";
 import ProductDetails from "./pages/ProductDetails";
 import Category from "./pages/Category";
 import CartShopping from "./pages/CartShopping";
+import Cancel from "./pages/Cancel";
+import Success from "./pages/Success";
  function App(){
   return (
     <Routes>
@@ -49,6 +51,8 @@ import CartShopping from "./pages/CartShopping";
       <Route path="/category" element={<Category />} />
       <Route path="/cart" element={<CartShopping />} />
       <Route path="/policy" element={<Policy />} />
+      <Route path="/cancel" element={<Cancel />} />
+      <Route path="/success" element={<Success />} />
       <Route path="*" element={<Pagenotfound />} />
     </Routes>
   );
