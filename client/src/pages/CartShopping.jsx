@@ -9,7 +9,7 @@ const CartShopping = () => {
   const { cart, setCart } = useCart();
   const { auth } = useAuth();
   const navigate = useNavigate();
-
+ 
   // ✅ Stripe payment
   const makePayment = async () => {
     const stripe = await loadStripe("pk_test_51RBqVnDBGd2fwg7t8NUoaHhLP9Vh5wTgEEoZNvtW929raqCcHcGW5bDfehkdJ5EreJzgw2qpRAR6rC9YQ7PYMavC00WIt1X3UD");
@@ -193,8 +193,8 @@ const CartShopping = () => {
               </div>
             )}
 
-            {/* ✅ Stripe Payment Button */}
-            {auth?.user?.address && cart?.length > 0 && (
+            {/* ✅ Stripe Payment Button 8*/}
+            {auth?.user?.address && cart?.length > 1 && (
               <button className="btn btn-primary mt-3" onClick={makePayment}>
                 Proceed to Payment
               </button>
