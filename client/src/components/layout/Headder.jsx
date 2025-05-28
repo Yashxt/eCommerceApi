@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom"; // Keep NavLink if needed elsewhere
 import { useAuth } from "../../context/Auth.jsx";
 import { useCart } from "../../context/cart.jsx";
+import { useSearch } from "../../context/Search.jsx";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "antd"; // Keep Ant Design Badge if still intended for cart count
 import toast from "react-hot-toast"; // Keep toast if you are using it
 
@@ -35,9 +37,10 @@ const UserIcon = () => (
 // --- End Icon Components ---
 
 const Header = () => { // Renamed from Headder for conventional spelling
-  const [searchTerm, setSearchTerm] = useState('');
+  const {values,setValues} = useSearch();
   const { auth, setAuth } = useAuth();
   const { cart } = useCart();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     setAuth({
@@ -49,6 +52,25 @@ const Header = () => { // Renamed from Headder for conventional spelling
     toast.success("Logout Successfully");
   };
 
+      const handleSubmit = async(e)=>{
+        e.preventDefault();
+        try{
+            const response = await fetch(`http://localhost:9090/api/v1/product/search/${values.keyword}`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+                 
+              const data = await response.json();
+           
+              setValues({ ...values, result: data.result  });
+              navigate("/search");
+         }
+        catch(error){
+            console.log(error);
+        }
+    }
   return (
     // Bootstrap Navbar component
     <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
@@ -64,7 +86,7 @@ const Header = () => { // Renamed from Headder for conventional spelling
         {/* Search Bar - Flex-grow to occupy available space */}
         <div className="d-flex flex-grow-1 justify-content-center me-lg-auto ms-lg-auto"> {/* Adjust margins for larger screens */}
           {/* Using a form for semantic correctness in a search context */}
-          <form className="d-flex w-100 me-2" role="search"> {/* w-100 to take full width of its parent */}
+          <form className="d-flex w-100 me-2" role="search" onSubmit= {handleSubmit}> {/* w-100 to take full width of its parent */}
             <div className="input-group"> {/* Bootstrap input group for prepending/appending icons/text */}
               <span className="input-group-text bg-white border-end-0" id="search-addon">
                 <SearchIcon />
@@ -75,8 +97,8 @@ const Header = () => { // Renamed from Headder for conventional spelling
                 placeholder="Search..."
                 aria-label="Search"
                 aria-describedby="search-addon"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={values.keyword}
+                onChange={(e) => setValues({...values,keyword:e.target.value})}
               />
             </div>
           </form>
@@ -124,7 +146,7 @@ const Header = () => { // Renamed from Headder for conventional spelling
               </button>
               <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1"> {/* dropdown-menu-end aligns menu to the right */}
                 <li>
-                  <Link
+                  <Link 
                     className="dropdown-item"
                     to={`/dashboard/${auth?.user?.role === 1 ? "admin" : "user"}`}
                   >
