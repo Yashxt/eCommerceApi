@@ -10,6 +10,16 @@ const ProductDetails = () => {
     const[product,setProduct] = useState({}); 
     const [relatedProducts,setRelatedProducts] = useState([]);
     const {cart,useCart};
+
+    const cardSetter = ()=>{
+      try{
+        
+      }
+
+      catch(error){
+
+      }
+    }
     const getProduct = async( )=>{
         try{
             const response = await fetch(`http://localhost:9090/api/v1/product/get-product/${params.slug}`, {
