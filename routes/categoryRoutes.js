@@ -1,6 +1,7 @@
 import express from "express"
 import { requireSignIn ,isAdmin} from "../middlewares/authMiddleware.js";
-import {createCategoryController,updateCategoryController,categoryController,singleCategoryController,deleteCategoryController,imageController} from "../controller/categoryController.js";
+import {createCategoryController,updateCategoryController,categoryController,
+    singleCategoryController,deleteCategoryController,imageController, getProductsByCategoryController} from "../controller/categoryController.js";
 const router = express.Router();
 import formidable from "express-formidable"
 router.post('/create-category',requireSignIn,isAdmin,formidable(),createCategoryController)
@@ -13,4 +14,5 @@ router.get("/single-category/:slug",singleCategoryController);
 //delete category
 router.delete("/delete-category/:id",requireSignIn,isAdmin,deleteCategoryController);
 router.get("/category-photo/:id",imageController);
+router.get('/products-by-category/:slug', getProductsByCategoryController);
 export default router;

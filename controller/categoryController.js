@@ -1,7 +1,7 @@
 import categoryModel from "../model/categoryModel.js";
 import slugify from "slugify";
 import fs from 'fs';
- 
+ import productModel from '../model/productModel.js';
  export const createCategoryController = async(req,res) =>  {
   try{
   const {name} = req.fields;
@@ -137,6 +137,39 @@ export const imageController = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error while getting photo',
+      error: error.message,
+    });
+  }
+};
+
+// controller/productController.js
+
+
+
+export const getProductsByCategoryController = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    // Optional: fetch category ID from slug if needed
+    const category = await categoryModel.findOne({ slug });
+    if (!category) {
+      return res.status(404).json({ success: false, message: "Category not found" });
+    }
+
+    // Fetch products with matching category
+    const products = await productModel.find({ category: category._id }).populate('category');
+
+    res.status(200).json({
+      success: true,
+      category: category.name,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching products by category",
       error: error.message,
     });
   }

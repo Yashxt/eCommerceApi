@@ -3,11 +3,13 @@ import LayoutTemp from '../components/layout/LayoutTemp'
 import { useState,useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
+import { useCart } from '../context/cart'
 const ProductDetails = () => { 
     const params = useParams();
     const navigate = useNavigate();
     const[product,setProduct] = useState({}); 
     const [relatedProducts,setRelatedProducts] = useState([]);
+    const {cart,useCart};
     const getProduct = async( )=>{
         try{
             const response = await fetch(`http://localhost:9090/api/v1/product/get-product/${params.slug}`, {
