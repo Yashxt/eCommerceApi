@@ -48,7 +48,7 @@ import Success from "./pages/Success";
      <Route path = "/login" element = {<Login/>} />
      <Route path="/about" element={<About />} />  
       <Route path="/contact" element={<Contact />} />
-      <Route path="/category" element={<Category />} />
+      <Route path="/category/:slug" element={<Category />} />
       <Route path="/cart" element={<CartShopping />} />
       <Route path="/policy" element={<Policy />} />
       <Route path="/cancel" element={<Cancel />} />

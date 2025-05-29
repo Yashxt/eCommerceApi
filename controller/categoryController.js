@@ -1,10 +1,11 @@
 import categoryModel from "../model/categoryModel.js";
 import slugify from "slugify";
-
+import fs from 'fs';
  
  export const createCategoryController = async(req,res) =>  {
   try{
-  const {name} = req.body;
+  const {name} = req.fields;
+  const {photo} = req.files;
   if(!name){
    return  res.status(401).send({message:"name is required"})
   }
@@ -14,7 +15,12 @@ import slugify from "slugify";
         message:"category already Exists",
     })
   }
-  const category = await new categoryModel({name,slug:slugify(name,{lower:true})}).save()
+  const category =  new categoryModel({name,slug:slugify(name,{lower:true})})
+   if (photo) {
+      category.photo.data = fs.readFileSync(photo.path);
+      category.photo.contentType = photo.type;
+    }
+    await category.save();
   res.status(201).send({
     success:true,
     message:"new category created",
@@ -112,3 +118,26 @@ catch(error){
   })
 }
 }
+
+
+export const imageController = async (req, res) => {
+  try {
+    const category = await categoryModel
+      .findById(req.params.id)
+      .select('+photo');
+
+    if (!category || !category.photo || !category.photo.data) {
+      return res.status(404).json({ success: false, message: 'Image not found' });
+    }
+
+    res.set('Content-Type', category.photo.contentType);
+    return res.status(200).send(category.photo.data);      // Buffer goes straight out
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error while getting photo',
+      error: error.message,
+    });
+  }
+};

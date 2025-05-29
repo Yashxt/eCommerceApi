@@ -30,7 +30,6 @@ const NewCollection = () => {
             }
         } catch (error) {
             setLoading(false);
-            console.error("Error fetching products:", error);
             toast.error("Something went wrong while fetching products.");
         }
     };
