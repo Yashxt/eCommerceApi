@@ -9,11 +9,8 @@ const Category = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [priceRange, setPriceRange] = useState([0, 10000]);
-  const [ratings, setRatings] = useState(0);
-  const [selectedBrands, setSelectedBrands] = useState([]);
-  const [availableBrands, setAvailableBrands] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 6;
 
   const fetchCategoryProducts = async () => {
     setLoading(true);
@@ -25,10 +22,6 @@ const Category = () => {
       const prodData = await prodRes.json();
       if (prodData.success) {
         setProducts(prodData.products);
-        const brands = [...new Set(
-          prodData.products.map((p) => p.name.split(' ')[0].toLowerCase())
-        )];
-        setAvailableBrands(brands);
       } else {
         setError(prodData.message || 'Failed to fetch products.');
         toast.error(prodData.message || 'Error fetching products.');
@@ -44,6 +37,14 @@ const Category = () => {
   useEffect(() => {
     if (slug) fetchCategoryProducts();
   }, [slug]);
+
+  // Get current products
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading)
     return (
@@ -62,181 +63,149 @@ const Category = () => {
     );
 
   return (
-    
     <LayoutTemp>
-    <div className="container-fluid my-4">
-      <div className="d-flex flex-wrap gap-4">
-        <aside className="filter-sidebar p-4 border rounded shadow-sm">
-          <h5 className="fw-semibold mb-3">Filter By</h5>
+      <div className="container-fluid mt-3">
+        <div className="row">
+          {/* Filter Sidebar - exactly matching image */}
+          <div className="col-md-3 pe-4" style={{ borderRight: '1px solid #eee' }}>
+            <h1 className="h4 fw-bold mb-3">Sneakers ({products.length})</h1>
+            <h2 className="h5 mb-2">Smoking Shoes</h2>
+            <p className="text-muted small mb-4">Lifestyle</p>
 
-          <div className="mb-4">
-            <h6 className="fw-semibold mb-2">Price</h6>
-            <input
-              type="range"
-              min="0"
-              max="10000"
-              step="100"
-              value={priceRange[1]}
-              onChange={(e) => setPriceRange([0, Number(e.target.value)])}
-              className="form-range"
-            />
-            <div className="d-flex justify-content-between small text-muted">
-              <span>${priceRange[0]}</span>
-              <span>${priceRange[1]}</span>
+            <div className="mb-4">
+              <h3 className="h6 fw-bold mb-3">Price Range</h3>
+              <table className="w-100 mb-3">
+                <thead>
+                  <tr>
+                    <th className="small text-start">Min</th>
+                    <th className="small text-end">Max</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan="2">
+                      <div className="d-flex justify-content-between">
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm w-45" 
+                          placeholder="0" 
+                        />
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm w-45" 
+                          placeholder="10000" 
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
 
-          <div className="mb-4">
-            <h6 className="fw-semibold mb-2">Ratings</h6>
-            {[5, 4, 3, 0].map((r) => (
-              <div className="form-check small" key={r}>
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="ratingsRadio"
-                  id={`rating-${r}`}
-                  checked={ratings === r}
-                  onChange={() => setRatings(r)}
-                />
-                <label className="form-check-label" htmlFor={`rating-${r}`}>
-                  {r ? `${r}★ ${r === 5 ? '' : '& Up'}` : 'All Ratings'}
-                </label>
+            <div className="mb-4">
+              <h3 className="h6 fw-bold mb-3">Brand</h3>
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" id="nike" />
+                <label className="form-check-label" htmlFor="nike">Nike</label>
               </div>
-            ))}
-          </div>
-
-          <div className="mb-4">
-            <h6 className="fw-semibold mb-2">Brands</h6>
-            {availableBrands.map((brand) => (
-              <div className="form-check small" key={brand}>
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  checked={selectedBrands.includes(brand)}
-                  onChange={() => {
-                    setSelectedBrands((prev) =>
-                      prev.includes(brand)
-                        ? prev.filter((b) => b !== brand)
-                        : [...prev, brand]
-                    );
-                  }}
-                  id={`brand-${brand}`}
-                />
-                <label className="form-check-label" htmlFor={`brand-${brand}`}>
-                  {brand.charAt(0).toUpperCase() + brand.slice(1)}
-                </label>
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" id="adidas" />
+                <label className="form-check-label" htmlFor="adidas">Adidas</label>
               </div>
-            ))}
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" id="balenciaga" />
+                <label className="form-check-label" htmlFor="balenciaga">Balenciaga</label>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="h6 fw-bold mb-3">Size</h3>
+              <div className="d-flex flex-wrap gap-2">
+                {[38, 39, 40, 41, 42, 43].map(size => (
+                  <button 
+                    key={size} 
+                    className="btn btn-sm p-0" 
+                    style={{
+                      width: '30px',
+                      height: '30px',
+                      border: '1px solid #ddd',
+                      borderRadius: '0',
+                      fontSize: '12px'
+                    }}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button 
+              className="btn btn-link p-0 text-decoration-none fw-bold"
+              style={{ fontSize: '14px' }}
+            >
+              Clear Filters
+            </button>
           </div>
 
-          <button className="btn btn-primary w-100 mb-2">Apply Filters</button>
-          <button
-            className="btn btn-outline-secondary w-100"
-            onClick={() => {
-              setPriceRange([0, 10000]);
-              setRatings(0);
-              setSelectedBrands([]);
-            }}
-          >
-            Clear Filters
-          </button>
-        </aside>
+          {/* Products Grid - updated to match image exactly */}
+          <div className="col-md-9">
+            <div className="row row-cols-1 row-cols-md-3 gx-4 gy-5"> {/* Increased gap between products */}
+              {currentProducts.map((p) => {
+                // Split product name for display
+                const nameParts = p.name.split(' ');
+                const brand = nameParts[0];
+                const model = nameParts.slice(1, -2).join(' ');
+                const color = nameParts.slice(-2).join(' ');
 
-        <main className="flex-grow-1">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h3 className="h5 mb-0">
-              Showing {products.length} products
-            </h3>
-            <select className="form-select form-select-sm w-auto">
-              <option>Newest</option>
-              <option>Price: Low → High</option>
-              <option>Price: High → Low</option>
-              <option>Average Rating</option>
-            </select>
-          </div>
-
-          {products.length === 0 ? (
-            <div className="alert alert-info text-center">No products found.</div>
-          ) : (
-            <div className="product-grid">
-              {products.map((p) => (
-                <Link
-                  to={`/product/${p.slug}`}
-                  key={p._id}
-                  className="product-card text-decoration-none text-dark"
-                >
-                  <div className="card h-100 border-0 shadow-sm">
-                    <img
-                      src={`http://localhost:9090/api/v1/product/product-photo/${p._id}`}
-                      alt={p.name}
-                      className="card-img-top p-3 product-thumb"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://placehold.co/280x280?text=No+Image';
-                      }}
-                    />
-                    <div className="card-body text-center">
-                      <h6 className="card-title mb-1">{p.name}</h6>
-                      <p className="fw-bold text-primary mb-0">
-                        ${p.price.toLocaleString()}
-                      </p>
-                    </div>
+                return (
+                  <div className="col" key={p._id}>
+                    <Link to={`/product/${p.slug}`} className="text-decoration-none text-dark">
+                      <div className="card h-100 border-0" style={{ minHeight: '350px' }}> {/* Increased height */}
+                        <div className="card-img-top p-3" style={{ height: '400px', overflow: 'hidden' }}>
+                          <img
+                            src={`http://localhost:9090/api/v1/product/product-photo/${p._id}`}
+                            alt={p.name}
+                            className="w-100 h-100 object-fit-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://placehold.co/280x280?text=No+Image';
+                            }}
+                          />
+                        </div>
+                        <div className="card-body p-2">
+                          <h5 className="card-title mb-1">{brand}</h5>
+                          <p className="text-muted mb-1">{model}</p>
+                          <p className="text-muted small mb-2">{color}</p>
+                          <p className="fw-bold mt-2">${p.price.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </Link>
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
-          )}
 
-          {/* ----- Pagination UI Placeholder -------------------- */}
-          <div className="d-flex justify-content-center mt-4">
-            <nav>
-              <ul className="pagination">
-                <li className="page-item disabled">
-                  <button className="page-link">Previous</button>
-                </li>
-                <li className="page-item active">
-                  <button className="page-link">1</button>
-                </li>
-                <li className="page-item">
-                  <button className="page-link">2</button>
-                </li>
-                <li className="page-item">
-                  <button className="page-link">3</button>
-                </li>
-                <li className="page-item">
-                  <button className="page-link">Next</button>
-                </li>
-              </ul>
-            </nav>
+            {/* Pagination */}
+            <div className="d-flex justify-content-between mt-5 mb-4">
+              <button 
+                className="btn btn-outline-secondary btn-sm"
+                disabled={currentPage === 1}
+                onClick={() => paginate(currentPage - 1)}
+              >
+                Previous
+              </button>
+              <span>Page {currentPage}</span>
+              <button 
+                className="btn btn-outline-secondary btn-sm"
+                disabled={currentProducts.length < productsPerPage}
+                onClick={() => paginate(currentPage + 1)}
+              >
+                Next
+              </button>
+            </div>
           </div>
-        </main>
+        </div>
       </div>
-
-      <style>{`
-        .filter-sidebar {
-          width: 260px;
-          max-height: calc(100vh - 6rem);
-          overflow-y: auto;
-        }
-        .product-grid {
-          --min: 220px;
-          display: grid;
-          grid-gap: 1.5rem;
-          grid-template-columns: repeat(auto-fill, minmax(var(--min), 1fr));
-        }
-        .product-thumb {
-          height: 220px;
-          object-fit: contain;
-        }
-        @media (max-width: 767px) {
-          .filter-sidebar {
-            width: 100%;
-            max-height: none;
-            margin-bottom: 1.5rem;
-          }
-        }
-      `}</style>
-    </div>
     </LayoutTemp>
   );
 };

@@ -1,48 +1,46 @@
-import React from 'react';
-import LayoutTemp from './../components/layout/LayoutTemp';
+import React from "react";
+import LayoutTemp from "./../components/layout/LayoutTemp";
 import { useCart } from "../context/cart";
-import { useAuth } from "../context/Auth";
+import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
+import toast from "react-hot-toast";
+
+const stripePromise = loadStripe(
+  "pk_test_51RBqVnDBGd2fwg7t8NUoaHhLP9Vh5wTgEEoZNvtW929raqCcHcGW5bDfehkdJ5EreJzgw2qpRAR6rC9YQ7PYMavC00WIt1X3UD"
+);
 
 const CartShopping = () => {
   const { cart, setCart } = useCart();
   const { auth } = useAuth();
   const navigate = useNavigate();
- 
-  // ✅ Stripe payment
+
   const makePayment = async () => {
-    const stripe = await loadStripe("pk_test_51RBqVnDBGd2fwg7t8NUoaHhLP9Vh5wTgEEoZNvtW929raqCcHcGW5bDfehkdJ5EreJzgw2qpRAR6rC9YQ7PYMavC00WIt1X3UD");
-    const body = {
-      products: cart,
-    };
-
-    const headers = {
-      "Content-Type": "application/json",
-    };
-
-    const response = await fetch(`http://localhost:9090/api/v1/auth/create-checkout-session`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    const session = await response.json();
-
-    const result = await stripe.redirectToCheckout({
-      sessionId: session.id,
-    });
-
-    if (result.error) {
-      console.log(result.error.message);
+    try {
+      const stripe = await stripePromise;
+      const response = await fetch(
+        "http://localhost:9090/api/v1/auth/create-checkout-session",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ products: cart }),
+        }
+      );
+      const session = await response.json();
+      const result = await stripe.redirectToCheckout({ sessionId: session.id });
+      if (result.error) {
+        toast.error(result.error.message);
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Error while processing payment");
     }
   };
 
-  // ✅ Total price calculation
   const totalPrice = () => {
     try {
       let total = 0;
-      cart?.forEach((item) => {
+      cart.forEach((item) => {
         total += item.price * (item.quantity || 1);
       });
       return total.toLocaleString("en-US", {
@@ -50,157 +48,240 @@ const CartShopping = () => {
         currency: "USD",
       });
     } catch (error) {
-      console.log(error);
+      console.log(error);99
     }
   };
 
-  // ✅ Remove item from cart
+  const updateCart = (updatedCart) => {
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
   const removeCartItem = (pid) => {
-    try {
-      const updatedCart = cart.filter((item) => item._id !== pid);
-      setCart(updatedCart);
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-    } catch (error) {
-      console.log(error);
-    }
+    let myCart = [...cart];
+    myCart = myCart.filter((item) => item._id !== pid);
+    updateCart(myCart);
   };
 
-  // ✅ Increment quantity
-  const increaseQuantity = (productId) => {
-    const updatedCart = cart.map((item) =>
-      item._id === productId
-        ? { ...item, quantity: (item.quantity || 1) + 1 }
-        : item
-    );
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const increaseQuantity = (pid) => {
+    const updatedCart = cart.map((item) => {
+      if (item._id === pid) {
+        return { ...item, quantity: (item.quantity || 1) + 1 };
+      }
+      return item;
+    });
+    updateCart(updatedCart);
   };
 
-  // ✅ Decrement quantity
-  const decreaseQuantity = (productId) => {
-    const updatedCart = cart.map((item) =>
-      item._id === productId && (item.quantity || 1) > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    );
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const decreaseQuantity = (pid) => {
+    const updatedCart = cart.map((item) => {
+      if (item._id === pid && item.quantity > 1) {
+        return { ...item, quantity: item.quantity - 1 };
+      }
+      return item;
+    });
+    updateCart(updatedCart);
   };
 
   return (
     <LayoutTemp>
-      <div className="container">
-        <div className="row">
-          <div className="col-md-12">
-            <h1 className="text-center bg-light p-2 mb-1">
-              {`hello ${auth?.token && auth?.user?.name}`}
-            </h1>
-            <h4 className="text-center">
-              {cart?.length > 1 ? (
-                auth?.token ? (
-                  <p>You have {cart.length} items in your cart</p>
-                ) : (
-                  <p>Please login to check out</p>
-                )
-              ) : (
-                <p>Your cart is empty</p>
-              )}
-            </h4>
+      <div className="cart-container" style={{ maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
+       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+  <h3 style={{ margin: 0 }}>Shopping Cart ({cart.length} items)</h3>
+  <button
+    onClick={() => navigate("/")}
+    style={{
+      background: "none",
+      border: "none",
+      color: "black",
+      textDecoration: "none",
+      cursor: "pointer",
+      fontSize: "16px",
+    }}
+  >
+    ← Back to Shopping
+  </button>
+</div>
+        {cart.map((p) => (
+          <div
+            key={p._id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "20px",
+              borderBottom: "1px solid #ccc",
+              paddingBottom: "10px",
+            }}
+          >
+            <img
+              src={`http://localhost:9090/api/v1/product/product-photo/${p._id}`}
+              alt={p.name}
+              style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "4px" }}
+            />
+            <div style={{ flex: 1, padding: "0 15px" }}>
+              <h4 style={{ margin: "0 0 5px" }}>{p.name}</h4>
+              <p style={{ margin: 0, color: "#777", fontSize: "14px" }}>
+                Size: {p.size || "—"} | Color: {p.color || "—"}
+              </p>
+              <p style={{ margin: "5px 0", fontWeight: "bold" }}>${p.price}</p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <button
+                onClick={() => decreaseQuantity(p._id)}
+                style={{
+                  padding: "5px 10px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              >
+                -
+              </button>
+              <span style={{ margin: "0 10px" }}>{p.quantity || 1}</span>
+              <button
+                onClick={() => increaseQuantity(p._id)}
+                style={{
+                  padding: "5px 10px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              >
+                +
+              </button>
+
+              <button
+                onClick={() => removeCartItem(p._id)}
+                style={{
+                  marginLeft: "15px",
+                  fontSize: "18px",
+                  color: "red",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+                title="Remove item"
+              >
+                🗑️
+              </button>
+            </div>
           </div>
-        </div>
+        ))}
 
-        <div className="row">
-          <div className="col-md-8">cart item
-            {cart?.map((p) => (
-              <div className="row mb-2 p-3 card flex-row" key={p._id}>
-                <div className="col-md-4">
-                  <img
-                    src={`http://localhost:9090/api/v1/product/product-photo/${p._id}`}
-                    className="card-img-top"
-                    alt={p.name}
-                  />
-                </div>
-                <div className="col-md-8">
-                  <h4>{p.name}</h4>
-                  <p>{p.description.substring(0, 30)}</p>
-                  <p>Price : ${p.price}</p>
-
-                  {/* ✅ Quantity control */}
-                  <div className="d-flex align-items-center gap-2 my-2">
-                    <button
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => decreaseQuantity(p._id)}
-                    >
-                      -
-                    </button>
-                    <span className="fw-bold">{p.quantity || 1}</span>
-                    <button
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => increaseQuantity(p._id)}
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  <div className="btn btn-danger" onClick={() => removeCartItem(p._id)}>
-                    Remove
-                  </div>
-                </div>
+        {/* Summary */}
+        {cart.length > 0 && (
+          <>
+            <div style={{ borderTop: "1px solid #ccc", paddingTop: "15px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Subtotal:</span>
+                <span>{totalPrice()}</span>
               </div>
-            ))}
-          </div>
-
-          <div className="col-md-4 text-center">
-            <h2>Cart Summary</h2>
-            <p>Total | Checkout | Payment</p>
-            <hr />
-            <h4>Total : {totalPrice()} </h4>
-
-            {auth?.user?.address ? (
-              <>
-                <div className="mb-3">
-                  <h4>Current Address</h4>
-                  <h5>{auth?.user?.address}</h5>
-                  <button
-                    className="btn btn-outline-warning"
-                    onClick={() => navigate("/dashboard/user/profile")}
-                  >
-                    Update Address
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="mb-3">
-                {auth?.token ? (
-                  <button
-                    className="btn btn-outline-warning"
-                    onClick={() => navigate("/dashboard/user/profile")}
-                  >
-                    Update Address
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-outline-warning"
-                    onClick={() =>
-                      navigate("/login", {
-                        state: "/cart",
-                      })
-                    }
-                  >
-                    Please Login to checkout
-                  </button>
-                )}
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Shipping:</span>
+                <span>Free</span>
               </div>
-            )}
+              <hr />
+              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: "18px" }}>
+                <span>Total:</span>
+                <span>{totalPrice()}</span>
+              </div>
+            </div>
 
-            {/* ✅ Stripe Payment Button 8*/}
-            {auth?.user?.address && cart?.length > 1 && (
-              <button className="btn btn-primary mt-3" onClick={makePayment}>
-                Proceed to Payment
+            {auth?.user?.address && cart.length > 0 && (
+              <button
+                onClick={makePayment}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "20px",
+                  backgroundColor: "black",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Proceed to Checkout
               </button>
             )}
+
+            {!auth?.token && (
+              <button
+                onClick={() => navigate("/login", { state: "/cart" })}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "10px",
+                  backgroundColor: "orange",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Please login to checkout
+              </button>
+            )}
+
+            {auth?.token && !auth?.user?.address && (
+              <button
+                onClick={() => navigate("/dashboard/user/profile")}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "10px",
+                  backgroundColor: "orange",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Add Shipping Address
+              </button>
+            )}
+
+            {auth?.user?.address && (
+              <button
+                onClick={() => navigate("/dashboard/user/profile")}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "10px",
+                  backgroundColor: "orange",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Update Address
+              </button>
+            )}
+          </>
+        )}
+
+        {cart.length === 0 && (
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <p>Your cart is empty</p>
+            <button
+              onClick={() => navigate("/")}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "blue",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              Back to Shopping
+            </button>
           </div>
-        </div>
+        )}
       </div>
     </LayoutTemp>
   );

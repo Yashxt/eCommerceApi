@@ -99,3 +99,27 @@
 
 
   }
+
+  /* === ProductDetails look-&-feel === */
+.pd-wrapper { padding: 3rem 0; }
+
+.pd-img-box {
+  max-width: 460px;
+  aspect-ratio: 1/1;
+  margin: auto;
+}
+
+.pd-heading        { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; }
+.pd-subheading     { font-size: 1.1rem; color: #555; }
+.pd-price          { font-size: 1.6rem; font-weight: 600; margin: .75rem 0 1.5rem; }
+
+.pd-size-btn,
+.pd-color-swatch   { width: 64px; height: 44px; border: 1px solid #ddd; background:#fff; cursor:pointer; }
+
+.pd-color-swatch   { border-radius: 50%; width: 34px; height: 34px; margin-right: .75rem; }
+
+.pd-cart-btn       { width: 100%; height: 54px; background:#000; color:#fff; border:none; font-weight:600; }
+
+.related-heading   { font-size: 1.5rem; font-weight: 600; margin: 3rem 0 2rem; }
+
+.related-card img  { aspect-ratio: 1/1; object-fit: cover; }

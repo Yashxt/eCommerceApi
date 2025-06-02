@@ -272,13 +272,13 @@ export const productSearchController = async(req,res)=>{
 export const relatedProductController = async(req,res)=>{
   try{
 const {pid,cid} = req.params;
-const products = await productModel.find({
+const product = await productModel.find({
    category:cid,
    _id:{$ne:pid},
 }).select("-photo").limit(3).populate("category");
 res.status(200).send({
   success:true,
-  products,
+  product,
 })
   }
   catch(error){

@@ -81,8 +81,7 @@ try {
   return (
     <LayoutTemp title = {"Dashboard-CreateProduct"}> 
       <div className="container-fluid m-3 p-3">
-    <h1>All Users</h1>
-    <div className="row">
+        <div className="row">
         <div className="col-md-3">
           <AdminMenu/>
         </div>
