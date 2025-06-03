@@ -1,39 +1,40 @@
 import React from "react";
 import LayoutTemp from "./../components/layout/LayoutTemp";
 import { useCart } from "../context/cart";
-import { useAuth } from "../context/auth";
+import { useAuth } from ".././context/Auth.jsx";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import toast from "react-hot-toast";
 
-const stripePromise = loadStripe(
-  "pk_test_51RBqVnDBGd2fwg7t8NUoaHhLP9Vh5wTgEEoZNvtW929raqCcHcGW5bDfehkdJ5EreJzgw2qpRAR6rC9YQ7PYMavC00WIt1X3UD"
-);
 
 const CartShopping = () => {
   const { cart, setCart } = useCart();
   const { auth } = useAuth();
   const navigate = useNavigate();
+     const makePayment = async () => {
+    const stripe = await loadStripe("pk_test_51RBqVnDBGd2fwg7t8NUoaHhLP9Vh5wTgEEoZNvtW929raqCcHcGW5bDfehkdJ5EreJzgw2qpRAR6rC9YQ7PYMavC00WIt1X3UD");
+    const body = {
+      products: cart,
+    };
 
-  const makePayment = async () => {
-    try {
-      const stripe = await stripePromise;
-      const response = await fetch(
-        "http://localhost:9090/api/v1/auth/create-checkout-session",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ products: cart }),
-        }
-      );
-      const session = await response.json();
-      const result = await stripe.redirectToCheckout({ sessionId: session.id });
-      if (result.error) {
-        toast.error(result.error.message);
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error("Error while processing payment");
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(`http://localhost:9090/api/v1/auth/create-checkout-session`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    const session = await response.json();
+
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+
+    if (result.error) {
+      console.log(result.error.message);
     }
   };
 
