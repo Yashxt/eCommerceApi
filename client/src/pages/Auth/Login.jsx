@@ -65,7 +65,7 @@ if (!validateEmail(email)) {
     return (
         <LayoutTemp title={"register -Ecommerce app"}>
             <div className="form-container">
-                <h1>Register</h1>
+                <h1>Login</h1>
                 <form onSubmit={handleSubmit}>
                    
                     <div className="mb-3">
