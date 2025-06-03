@@ -33,7 +33,6 @@ export const requireSignIn = async (req, res, next) => {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
-
 //admin access
 export const isAdmin = async(req,res,next)=>{
     try{
