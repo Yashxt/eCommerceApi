@@ -106,12 +106,14 @@ const Header = () => { // Renamed from Headder for conventional spelling
 
         {/* Right side actions - d-flex for horizontal alignment */}
         <div className="d-flex align-items-center">
-          <button
-            type="button"
-            className="btn btn-dark btn-sm me-2 d-none d-lg-block" // btn-sm for small button, d-none d-lg-block to hide on small/medium screens
-          >
-            BECOME A SELLER
-          </button>
+    { auth?.user?.role == 0 &&(<button
+  type="button"
+  className="btn btn-dark btn-sm me-2 d-none d-lg-block"
+ >
+   <Link to="/adminregister" state={{ role: 1 }} className="text-white text-decoration-none">
+    BECOME A SELLER
+  </Link>
+  </button>)}
           <button
             type="button"
             className="btn btn-link text-dark p-1 me-2" // btn-link for button that looks like a link, text-dark for color

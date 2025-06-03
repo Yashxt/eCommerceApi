@@ -50,6 +50,53 @@ catch(error){
 
 }
 
+ export const  adminregisterController = async (req,res)=>{
+try{
+    const {name,email,password,phone,address,answer,role} = req.body;
+    if(!name){
+   return  res.send({message:"name is required"});
+    }if(!email){
+      return  res.send({message:"email is required"});
+    }if(!password){
+       return res.send({message:"password is required"});
+    }if(!phone){
+      return  res.send({message:"phone is required"});
+    }
+    if(!address){
+      return  res.send({message:"address is required"});
+    }
+    if(!answer){
+      return  res.send({message:"answer  is required"});
+    }
+    
+    //checking for existing account
+        const existingUser = await userModel.findOne({email});
+        if(existingUser){
+            return  res.status(200).send({
+                success:false,
+                message:"user already exists plz login",
+            })
+        }
+        //register new user
+        const hashedPassword = await hashPassword(password);
+        const user = await new userModel({name,email,password:hashedPassword,phone,address,answer,role}).save();
+        res.status(201).send({
+            success:true,
+            message:"user created succesfully",
+            user,
+        }) 
+}
+catch(error){
+    console.log(error);
+    res.status(500).send({
+      success:false,
+      message:"error in registration",
+      error
+    })
+}
+
+}
+
 export const forgotPasswordController = async(req,res)=>{
    try{ 
       const {email,answer,newPassword} = req.body;

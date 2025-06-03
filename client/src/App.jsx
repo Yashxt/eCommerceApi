@@ -24,6 +24,7 @@ import Category from "./pages/Category";
 import CartShopping from "./pages/CartShopping";
 import Cancel from "./pages/Cancel";
 import Success from "./pages/Success";
+import AdminRegister from "./pages/Auth/AdminRegister";
  function App(){
   return (
     <Routes>
@@ -53,6 +54,7 @@ import Success from "./pages/Success";
       <Route path="/policy" element={<Policy />} />
       <Route path="/cancel" element={<Cancel />} />
       <Route path="/success" element={<Success />} />
+      <Route path = '/adminregister' element={<AdminRegister/>}/>
       <Route path="*" element={<Pagenotfound />} />
     </Routes>
   );

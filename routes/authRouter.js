@@ -1,4 +1,4 @@
-import {registerController,loginController,testController,forgotPasswordController,updateProfileController} from "../controller/authController.js"
+import {registerController,loginController,testController,forgotPasswordController,adminregisterController,updateProfileController} from "../controller/authController.js"
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 import express from "express";
 import Stripe from 'stripe';
@@ -8,6 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRETKEY);
 
 const router = express.Router();
 router.post("/register",registerController)
+router.post("/adminregister",adminregisterController)
 router.post("/login",loginController)
 router.get("/test",requireSignIn,isAdmin,testController);
 
